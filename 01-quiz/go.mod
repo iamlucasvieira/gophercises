@@ -1,3 +1,3 @@
-module github.com/iamlucasvieira/gophercises/01-quiz
+module iamlucasvieira/gophercises/01-quiz
 
-go 1.20
+go 1.21.1
