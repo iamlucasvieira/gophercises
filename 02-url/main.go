@@ -27,16 +27,25 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	fmt.Println("Starting the server on :8080")
-	http.ListenAndServe(":8080", yamlHandler)
+	err = http.ListenAndServe(":8080", yamlHandler)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
+// defaultMux returns a ServeMux with a single route for the path "/".
 func defaultMux() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", hello)
 	return mux
 }
 
-func hello(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Hello, world!")
+// hello is a simple handler function that writes a response.
+func hello(w http.ResponseWriter, _ *http.Request) {
+	_, err := fmt.Fprintln(w, "Hello, world!")
+	if err != nil {
+		fmt.Println(err)
+	}
 }

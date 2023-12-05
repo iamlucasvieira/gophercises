@@ -1,8 +1,14 @@
 package main
 
 import (
+	"gopkg.in/yaml.v3"
 	"net/http"
 )
+
+type T struct {
+	Path string `yaml:"path"`
+	URL  string `yaml:"url"`
+}
 
 // MapHandler will return an http.HandlerFunc (which also
 // implements http.Handler) that will attempt to map any
@@ -11,8 +17,13 @@ import (
 // If the path is not provided in the map, then the fallback
 // http.Handler will be called instead.
 func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.HandlerFunc {
-	//	TODO: Implement this...
-	return nil
+	return func(w http.ResponseWriter, r *http.Request) {
+		if url, ok := pathsToUrls[r.URL.Path]; ok {
+			http.Redirect(w, r, url, http.StatusFound)
+			return
+		}
+		fallback.ServeHTTP(w, r)
+	}
 }
 
 // YAMLHandler will parse the provided YAML and then return
@@ -32,6 +43,18 @@ func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.Handl
 // See MapHandler to create a similar http.HandlerFunc via
 // a mapping of paths to urls.
 func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
-	// TODO: Implement this...
-	return nil, nil
+	var t []T
+
+	err := yaml.Unmarshal(yml, &t)
+	if err != nil {
+		return nil, err
+	}
+
+	// Transform into map
+	pathsToUrls := make(map[string]string)
+	for _, v := range t {
+		pathsToUrls[v.Path] = v.URL
+	}
+
+	return MapHandler(pathsToUrls, fallback), nil
 }
